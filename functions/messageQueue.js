@@ -37,6 +37,7 @@ const sendResponse = async () => {
             });
         } catch (e) {
             console.log(e)
+            clearChatHistory(ctx.message?.chat?.id.toString())
             ctx.reply("Error occured!")
         } finally {
             messageQueue.shift() // remove first element from queue}
