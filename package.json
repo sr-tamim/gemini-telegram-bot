@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "description": "A Telegram bot uses Gemini api to response messages",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "devDependencies": {},
   "author": "SR Tamim",
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.5.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "nodemon": "^3.1.0",
+    "telegraf": "^4.16.3"
   }
 }
