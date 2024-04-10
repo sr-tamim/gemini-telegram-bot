@@ -12,7 +12,7 @@ const addMessageToQueue = (ctx, loadingMsg) => {
 
 const sendResponse = async () => {
     if (messageQueue.length === 0) return console.log("No message in queue")
-    const { ctx, loadingMsg } = messageQueue[0]
+    const { ctx } = messageQueue[0]
     const now = Date.now()
     const timeGap = now - lastReplySent
     if (timeGap > delay) {
@@ -25,8 +25,6 @@ const sendResponse = async () => {
 
             // generate response from openai
             let response = await generateChatResponse(ctx.message.text, ctx.message?.chat?.id.toString(), senderName);
-
-            ctx.deleteMessage(loadingMsg.message_id) // delete "generating response..." message
 
             if (!response) {
                 response = "🤐";

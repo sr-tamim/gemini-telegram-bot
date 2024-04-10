@@ -1,6 +1,6 @@
 require("dotenv").config()
 const { Telegraf } = require("telegraf")
-const { checkGroup } = require("./misc")
+const { checkGroup, clearChatHistory } = require("./misc")
 const { addMessageToQueue } = require("./messageQueue")
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
@@ -46,13 +46,11 @@ bot.on("message", async (ctx) => {
         // message must be a reply of this bot's message
         if (ctx.message?.reply_to_message?.from?.id?.toString() !== process.env.BOT_ID.toString()) return
 
-        const loadingMsg = await ctx.reply("Generating response...", {
-            reply_to_message_id: ctx.message?.message_id,
-            allow_sending_without_reply: true,
-        })
-        addMessageToQueue(ctx, loadingMsg)
+        ctx.telegram.sendChatAction(ctx.message.chat.id, "typing")
+        addMessageToQueue(ctx)
     } catch (error) {
         console.log(error)
+        clearChatHistory(ctx.message?.chat?.id.toString())
         return ctx.reply("Error occured");
     }
 })
