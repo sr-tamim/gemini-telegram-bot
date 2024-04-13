@@ -10,6 +10,9 @@ bot.start(async ctx => {
     try {
         if (!checkGroup(ctx)) return; // check if bot is allowed to reply in this group
 
+        // clear chat history
+        clearChatHistory(ctx.message?.chat?.id.toString())
+
         return ctx.reply("Hi, this is *Gemini Bot BD*, ready to chat with you. \nReply to my message to start chatting...", {
             parse_mode: "Markdown",
             reply_to_message_id: ctx.message?.message_id,
@@ -17,7 +20,7 @@ bot.start(async ctx => {
             reply_markup: { force_reply: true, selective: true }
         })
     } catch (e) {
-        console.error("error in start action:", e)
+        console.error("Error in start action:", e)
         return ctx.reply("Error occured")
     }
 })
