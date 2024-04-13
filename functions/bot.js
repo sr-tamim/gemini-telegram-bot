@@ -1,6 +1,6 @@
 require("dotenv").config()
 const { Telegraf } = require("telegraf")
-const { checkGroup, clearChatHistory } = require("./misc")
+const { checkGroup, clearChatHistory, errorLog } = require("./misc")
 const { addMessageToQueue } = require("./messageQueue")
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
@@ -20,6 +20,7 @@ bot.start(async ctx => {
             reply_markup: { force_reply: true, selective: true }
         })
     } catch (e) {
+        errorLog(e)
         console.error("Error in start action:", e)
         return ctx.reply("Error occured")
     }
@@ -33,6 +34,7 @@ bot.command("about", async ctx => {
             allow_sending_without_reply: true
         })
     } catch (e) {
+        errorLog(e)
         console.error("error in about action:", e)
         return ctx.reply("Error occured")
     }
@@ -54,6 +56,7 @@ bot.on("message", async (ctx) => {
     } catch (error) {
         console.log(error)
         clearChatHistory(ctx.message?.chat?.id.toString())
+        errorLog(error)
         return ctx.reply("Error occured");
     }
 })
