@@ -3,3 +3,5 @@ services:
     container_name: gemini-telegram-bot
     build: ./
     restart: always
+    volumes:
+      - ./logs:/app/logs
