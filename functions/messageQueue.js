@@ -1,4 +1,4 @@
-const { generateChatResponse, clearChatHistory } = require("./misc")
+const { generateChatResponse, clearChatHistory, errorLog } = require("./misc")
 
 // message queue to avoid gemini free api limit
 const messageQueue = []
@@ -36,9 +36,24 @@ const sendResponse = async () => {
                 reply_markup: { force_reply: true, selective: true } // to force user to reply to this message
             });
         } catch (e) {
-            console.log(e)
-            clearChatHistory(ctx.message?.chat?.id.toString())
-            ctx.reply("Error occured!")
+            if (e?.response?.error_code === 400 && e?.response?.description?.toLowerCase().includes("can't parse entities")) {
+                try {
+                    // if error is due to parsing entities, try sending message without markdown
+                    const res = e?.on?.payload?.text || "Error occured!"
+                    await ctx.reply(res, {
+                        reply_to_message_id: ctx.message?.message_id,
+                        allow_sending_without_reply: true,
+                        reply_markup: { force_reply: true, selective: true }
+                    })
+                } catch (e) { }
+            }
+            else {
+                // if error occured, clear chat history
+                clearChatHistory(ctx.message?.chat?.id.toString())
+                // write error log
+                errorLog(e)
+                ctx.reply("Error occured!")
+            }
         } finally {
             messageQueue.shift() // remove first element from queue}
             lastReplySent = Date.now() // update last reply sent time
