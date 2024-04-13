@@ -2,6 +2,7 @@ require("dotenv").config()
 const { Telegraf } = require("telegraf")
 const { checkGroup, clearChatHistory, errorLog } = require("./misc")
 const { addMessageToQueue } = require("./messageQueue")
+const { getContentResponse } = require("../gemini/generateContent")
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
 /* ======= bot actions ======= */
@@ -36,6 +37,35 @@ bot.command("about", async ctx => {
     } catch (e) {
         errorLog(e)
         console.error("error in about action:", e)
+        return ctx.reply("Error occured")
+    }
+})
+
+bot.command("translate", async ctx => {
+    console.log("Received /translate command")
+    try {
+        if (!checkGroup(ctx)) return; // check if bot is allowed to reply in this group
+
+        // translation input text from reply to message
+        let text = ctx.message?.reply_to_message?.text
+        if (!text) {
+            return ctx.reply("Reply to a message to translate it")
+        }
+        text = `translate to bn: "${text.trim()}"`
+
+        ctx.telegram.sendChatAction(ctx.message.chat.id, "typing")
+        const res = await getContentResponse(text)
+        if (!res) {
+            return ctx.reply("🤐")
+        }
+        return ctx.reply(res, {
+            parse_mode: "Markdown",
+            reply_to_message_id: ctx.message.message_id,
+            allow_sending_without_reply: true
+        })
+    } catch (e) {
+        errorLog(e)
+        console.error("Error in translate action:", e)
         return ctx.reply("Error occured")
     }
 })
