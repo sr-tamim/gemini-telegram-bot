@@ -1,6 +1,7 @@
 require("dotenv").config()
 const allowedGroups = process.env.GROUP_ID.toString().split(',')
 const ai = require("../gemini/geminiAI")
+const fs = require("fs")
 
 const chats = {}
 
@@ -61,6 +62,26 @@ async function generateChatResponse(prompt, chatId, senderName) {
     return txt
 }
 
+// write log to file
+function errorLog(err) {
+    const msg = err.message || JSON.stringify(err)
+    const date = new Date().toLocaleString()
+    // create logs folder if not exists
+    if (!fs.existsSync("./logs")) {
+        fs.mkdirSync("./logs")
+    }
+    // create error.txt file if not exists
+    if (!fs.existsSync("./logs/error.txt")) {
+        fs.writeFileSync("./logs/error.txt", "")
+    }
+    fs.appendFile("./logs/error.txt",
+        `[${date}] ${msg}\n\n   ======   \n`,
+        (err) => {
+            if (err) console.log(err)
+        }
+    )
+}
+
 module.exports = {
-    checkGroup, generateChatResponse, clearChatHistory
+    checkGroup, generateChatResponse, clearChatHistory, errorLog
 }
