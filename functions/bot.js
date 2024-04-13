@@ -1,8 +1,9 @@
 require("dotenv").config()
 const { Telegraf } = require("telegraf")
-const { checkGroup, clearChatHistory, errorLog } = require("./misc")
+const { checkGroup, errorLog } = require("./misc")
 const { addMessageToQueue } = require("./messageQueue")
 const { getContentResponse } = require("../gemini/generateContent")
+const { clearChatHistory } = require("../gemini/generateChat")
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
 /* ======= bot actions ======= */
@@ -64,6 +65,20 @@ bot.command("translate", async ctx => {
             allow_sending_without_reply: true
         })
     } catch (e) {
+        if (e?.response?.error_code === 400 && e?.response?.description?.toLowerCase().includes("can't parse entities")) {
+            try {
+                // if error is due to parsing entities, try sending message without markdown
+                const res = e?.on?.payload?.text || "Error occured!"
+                return ctx.reply(res, {
+                    reply_to_message_id: ctx.message?.message_id,
+                    allow_sending_without_reply: true,
+                    reply_markup: { force_reply: true, selective: true }
+                })
+            } catch (e) {
+                errorLog(e)
+                return ctx.reply("Error occured")
+            }
+        }
         errorLog(e)
         console.error("Error in translate action:", e)
         return ctx.reply("Error occured")

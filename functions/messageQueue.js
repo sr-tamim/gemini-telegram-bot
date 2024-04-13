@@ -1,4 +1,5 @@
-const { generateChatResponse, clearChatHistory, errorLog } = require("./misc")
+const { errorLog } = require("./misc")
+const { generateChatResponse, clearChatHistory } = require("../gemini/generateChat")
 
 // message queue to avoid gemini free api limit
 const messageQueue = []
