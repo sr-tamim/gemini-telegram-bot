@@ -7,7 +7,7 @@
 
 ### Description
 
-This code is a Telegram chatbot built using the Telegraf library in Node.js. This chatbot uses the Gemini API to generate responses to messages sent to it by users. It uses the Telegraf library for Telegram API for generating chat responses. The bot's functionality is based on the `generateChatResponse` function, which takes user input as an argument and generates a response using the Gemini API. The bot also has a /start or /translate command which greets the user and prompts them to start chatting.
+This code is a Telegram chatbot built using the Telegraf library in Node.js. This chatbot uses the Gemini API to generate responses to messages sent to it by users. It uses the Telegraf library for Telegram API for generating chat responses. The bot's functionality is based on the `generateChatResponse` function, which takes user input as an argument and generates a response using the Gemini API. The bot also has a `/start` or `/translate` command which greets the user and prompts them to start chatting.
 
 #### What is a Telegram Bot?
 
