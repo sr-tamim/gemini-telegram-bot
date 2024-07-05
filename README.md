@@ -1,7 +1,7 @@
 <h1 align="center">Gemini Telegram Bot</h1>
 <h6 align="center">Feel the era of artificial intelligence</h6>
 
-<h5 align="center">This repository contains the code of a Telegram chatbot built using Nodejs and hosted as Netlify serverless function. This chatbot uses Gemini API to send reply to users on Telegram.</h5>
+<h5 align="center">This repository contains the code of a Telegram chatbot built using Nodejs. This chatbot uses Gemini API to send reply to users on Telegram.</h5>
 
 ------
 
