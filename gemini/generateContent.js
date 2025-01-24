@@ -1,10 +1,9 @@
-
-const ai = require("../gemini/geminiAI")
+const ai = require("../gemini/geminiAI");
 
 async function getContentResponse(prompt) {
-    const res = await ai.generateContent(prompt)
-    const txt = res.response.text()
-    return txt
+  const res = await ai.generateContent(prompt);
+  const txt = res.response.text();
+  return txt;
 }
 
-module.exports = { getContentResponse }
+module.exports = { getContentResponse };

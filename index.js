@@ -1,4 +1,4 @@
-const { bot } = require("./functions/bot")
+const { bot } = require("./functions/bot");
 
-bot.launch()
-console.log("Bot started")
+bot.launch();
+console.log("Bot started");

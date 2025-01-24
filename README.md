@@ -3,7 +3,7 @@
 
 <h5 align="center">This repository contains the code of a Telegram chatbot built using Nodejs. This chatbot uses Gemini API to send reply to users on Telegram.</h5>
 
-------
+---
 
 ### Description
 
