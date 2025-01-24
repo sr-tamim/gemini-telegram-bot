@@ -1,5 +1,6 @@
 require("dotenv").config()
 const { Telegraf } = require("telegraf")
+const { message} = require("telegraf/filters")
 const { checkGroup, errorLog } = require("./misc")
 const { addMessageToQueue } = require("./messageQueue")
 const { getContentResponse } = require("../gemini/generateContent")
@@ -19,7 +20,7 @@ bot.start(async ctx => {
             parse_mode: "Markdown",
             reply_to_message_id: ctx.message?.message_id,
             allow_sending_without_reply: true,
-            reply_markup: { force_reply: true, selective: true }
+            // reply_markup: { force_reply: true, selective: true }
         })
     } catch (e) {
         errorLog(e)
@@ -72,7 +73,7 @@ bot.command("translate", async ctx => {
                 return ctx.reply(res, {
                     reply_to_message_id: ctx.message?.message_id,
                     allow_sending_without_reply: true,
-                    reply_markup: { force_reply: true, selective: true }
+                    // reply_markup: { force_reply: true, selective: true }
                 })
             } catch (e) {
                 errorLog(e)
@@ -86,7 +87,7 @@ bot.command("translate", async ctx => {
 })
 
 
-bot.on("message", async (ctx) => {
+bot.on(message("reply_to_message"), async (ctx) => {
     if (ctx.message.via_bot) {
         return ctx.reply("Sorry! I don't reply bots.");
     }

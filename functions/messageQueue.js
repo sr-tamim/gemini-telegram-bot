@@ -34,7 +34,7 @@ const sendResponse = async () => {
                 parse_mode: "Markdown", // to parse markdown in response
                 reply_to_message_id: ctx.message?.message_id, // to reply to user's the message
                 allow_sending_without_reply: true, // send message even if user's message is not found
-                reply_markup: { force_reply: true, selective: true } // to force user to reply to this message
+                // reply_markup: { force_reply: true, selective: true } // to force user to reply to this message
             });
         } catch (e) {
             if (e?.response?.error_code === 400 && e?.response?.description?.toLowerCase().includes("can't parse entities")) {
@@ -44,7 +44,7 @@ const sendResponse = async () => {
                     await ctx.reply(res, {
                         reply_to_message_id: ctx.message?.message_id,
                         allow_sending_without_reply: true,
-                        reply_markup: { force_reply: true, selective: true }
+                        // reply_markup: { force_reply: true, selective: true }
                     })
                 } catch (e) { }
             }

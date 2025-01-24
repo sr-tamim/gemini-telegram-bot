@@ -19,7 +19,7 @@ const getNewChat = () => {
             }
         ],
         generationConfig: {
-            maxOutputTokens: 500
+            maxOutputTokens: 1000
         }
     })
 }
