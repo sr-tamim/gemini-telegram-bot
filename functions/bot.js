@@ -1,11 +1,14 @@
 require("dotenv").config()
-const { Telegraf } = require("telegraf")
+const { Telegraf, Telegram } = require("telegraf")
 const { message} = require("telegraf/filters")
 const { checkGroup, errorLog } = require("./misc")
 const { addMessageToQueue } = require("./messageQueue")
 const { getContentResponse } = require("../gemini/generateContent")
 const { clearChatHistory } = require("../gemini/generateChat")
+const { analyzeImageResponse } = require("../gemini/analyzeImage")
+
 const bot = new Telegraf(process.env.BOT_TOKEN)
+const tg = new Telegram(process.env.BOT_TOKEN)
 
 /* ======= bot actions ======= */
 bot.start(async ctx => {
@@ -106,6 +109,53 @@ bot.on(message("reply_to_message"), async (ctx) => {
         return ctx.reply("Error occured");
     }
 })
+
+bot.on(message("photo"), async (ctx) => {
+  if (ctx.message.via_bot) {
+    return ctx.reply("Sorry! I don't reply bots.");
+  }
+  try {
+    if (!checkGroup(ctx)) return; // check if bot is allowed to reply in this group
+
+    // message must be a reply of this bot's message
+    if (ctx.message?.reply_to_message?.from?.id?.toString() !== process.env.BOT_ID.toString()) return
+    ctx.telegram.sendChatAction(ctx.message.chat.id, "typing");
+
+    const fileURL = await tg.getFileLink(
+      ctx.message.photo[ctx.message.photo.length - 1]?.file_id
+    );
+    const response = await analyzeImageResponse(
+      fileURL,
+      ctx.message.caption || "Analyze this image"
+    );
+
+    await ctx.reply(response, {
+      parse_mode: "Markdown", // to parse markdown in response
+      reply_to_message_id: ctx.message?.message_id, // to reply to user's the message
+      allow_sending_without_reply: true, // send message even if user's message is not found
+    });
+  } catch (e) {
+    if (
+      e?.response?.error_code === 400 &&
+      e?.response?.description?.toLowerCase().includes("can't parse entities")
+    ) {
+      try {
+        // if error is due to parsing entities, try sending message without markdown
+        const res = e?.on?.payload?.text || "Error occured!";
+        ctx.reply(res, {
+          reply_to_message_id: ctx.message?.message_id,
+          allow_sending_without_reply: true,
+        });
+      } catch (e) {
+        errorLog(e);
+        return ctx.reply("Error occured");
+      }
+    }
+    console.log(new Date().toISOString() + " => " + e.message);
+    errorLog(e);
+    ctx.reply("Error occured");
+  }
+});
 
 module.exports = {
     bot
