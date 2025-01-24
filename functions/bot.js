@@ -123,6 +123,7 @@ bot.on(message("reply_to_message"), async (ctx) => {
 });
 
 bot.on(message("photo"), async (ctx) => {
+  console.log("Received photo message");
   if (ctx.message.via_bot) {
     return ctx.reply("Sorry! I don't reply bots.");
   }
@@ -135,41 +136,13 @@ bot.on(message("photo"), async (ctx) => {
       process.env.BOT_ID.toString()
     )
       return;
+
     ctx.telegram.sendChatAction(ctx.message.chat.id, "typing");
-
-    const fileURL = await tg.getFileLink(
-      ctx.message.photo[ctx.message.photo.length - 1]?.file_id
-    );
-    const response = await analyzeImageResponse(
-      fileURL,
-      ctx.message.caption || "Analyze this image"
-    );
-
-    await ctx.reply(response, {
-      parse_mode: "Markdown", // to parse markdown in response
-      reply_to_message_id: ctx.message?.message_id, // to reply to user's the message
-      allow_sending_without_reply: true, // send message even if user's message is not found
-    });
-  } catch (e) {
-    if (
-      e?.response?.error_code === 400 &&
-      e?.response?.description?.toLowerCase().includes("can't parse entities")
-    ) {
-      try {
-        // if error is due to parsing entities, try sending message without markdown
-        const res = e?.on?.payload?.text || "Error occured!";
-        ctx.reply(res, {
-          reply_to_message_id: ctx.message?.message_id,
-          allow_sending_without_reply: true,
-        });
-      } catch (e) {
-        errorLog(e);
-        return ctx.reply("Error occured");
-      }
-    }
-    console.log(new Date().toISOString() + " => " + e.message);
-    errorLog(e);
-    ctx.reply("Error occured");
+    addMessageToQueue(ctx);
+  } catch (error) {
+    console.log(error);
+    errorLog(error);
+    return ctx.reply("Error occured");
   }
 });
 

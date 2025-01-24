@@ -28,12 +28,23 @@ const sendResponse = async () => {
         : ctx.message?.from?.username || null;
 
       // generate response from openai
-      let response = await generateChatResponse(
-        ctx.message.text,
-        ctx.message?.chat?.id.toString(),
-        senderName
-      );
+      let response;
 
+      if (ctx.message?.photo) {
+        const fileURL = await tg.getFileLink(
+          ctx.message.photo[ctx.message.photo.length - 1]?.file_id
+        );
+        response = await analyzeImageResponse(
+          fileURL,
+          ctx.message.caption || "Analyze this image"
+        );
+      } else {
+        response = await generateChatResponse(
+          ctx.message.text,
+          ctx.message?.chat?.id.toString(),
+          senderName
+        );
+      }
       if (!response) {
         response = "🤐";
       }
@@ -57,7 +68,10 @@ const sendResponse = async () => {
             allow_sending_without_reply: true,
             // reply_markup: { force_reply: true, selective: true }
           });
-        } catch (e) {}
+        } catch (e) {
+          errorLog(e);
+          ctx.reply("Error occured!");
+        }
       } else {
         // if error occured, clear chat history
         clearChatHistory(ctx.message?.chat?.id.toString());
