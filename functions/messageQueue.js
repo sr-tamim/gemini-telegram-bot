@@ -1,3 +1,4 @@
+const { Telegram } = require("telegraf");
 const { errorLog } = require("./misc");
 const {
   generateChatResponse,

@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Telegraf, Telegram } = require("telegraf");
+const { Telegraf } = require("telegraf");
 const { message } = require("telegraf/filters");
 const { checkGroup, errorLog } = require("./misc");
 const { addMessageToQueue } = require("./messageQueue");
