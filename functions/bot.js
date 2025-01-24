@@ -5,10 +5,8 @@ const { checkGroup, errorLog } = require("./misc");
 const { addMessageToQueue } = require("./messageQueue");
 const { getContentResponse } = require("../gemini/generateContent");
 const { clearChatHistory } = require("../gemini/generateChat");
-const { analyzeImageResponse } = require("../gemini/analyzeImage");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-const tg = new Telegram(process.env.BOT_TOKEN);
 
 /* ======= bot actions ======= */
 bot.start(async (ctx) => {

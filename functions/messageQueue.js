@@ -3,7 +3,9 @@ const {
   generateChatResponse,
   clearChatHistory,
 } = require("../gemini/generateChat");
+const { analyzeImageResponse } = require("../gemini/analyzeImage");
 
+const tg = new Telegram(process.env.BOT_TOKEN);
 // message queue to avoid gemini free api limit
 const messageQueue = [];
 let lastReplySent = Date.now();
