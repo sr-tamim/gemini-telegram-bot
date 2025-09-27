@@ -9,12 +9,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "SR Tamim",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "dotenv": "^16.4.7",
-    "nodemon": "^3.1.9",
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "^17.2.2",
+    "nodemon": "^3.1.10",
     "telegraf": "^4.16.3"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@4.10.3"
 }
