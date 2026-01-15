@@ -1,4 +1,6 @@
-import ai from "./geminiAI";
+import { ApiError } from "@google/genai";
+import { errorLog } from "../functions/misc";
+import ai, { genAiConfig, genAiModel } from "./geminiAI";
 
 function getMimeType(url: string): string | null {
   const ext = url.split(".").pop();
@@ -20,26 +22,46 @@ function getMimeType(url: string): string | null {
 }
 
 async function analyzeImageResponse(
-  imgURL: URL, 
+  imgURL: URL,
   caption: string
 ): Promise<string> {
-  const mimeType = getMimeType(imgURL.href);
-  if (!mimeType) {
-    return "Unsupported image format";
+  try {
+    const mimeType = getMimeType(imgURL.href);
+    if (!mimeType) {
+      return "Unsupported image format";
+    }
+    const imgRes = await fetch(imgURL.href).then((res) => res.arrayBuffer());
+    const base64Img = Buffer.from(imgRes).toString("base64");
+
+    const res = await ai.models.generateContent({
+      model: genAiModel,
+      config: genAiConfig,
+      contents: [
+        {
+          inlineData: {
+            data: base64Img,
+            mimeType: mimeType,
+          },
+        },
+        { text: caption },
+      ],
+    });
+    const txt = res.text || "";
+    return txt || "";
+  } catch (e: any) {
+    errorLog(e);
+    if (e instanceof ApiError) {
+      const error = JSON.parse(e.message)?.error;
+      if (error?.code === 429) {
+        return "⚠️ Rate limit exceeded. Please try again later.";
+      } else if (error?.code === 503) {
+        return "⚠️ Service unavailable. Please try again later.";
+      } else {
+        return `⚠️ An error occurred: ${error?.message || "Unknown error"}`;
+      }
+    }
+    return "⚠️ An unexpected error occurred. Please try again later.";
   }
-  const imgRes = await fetch(imgURL.href).then((res) => res.arrayBuffer());
-  const base64Img = Buffer.from(imgRes).toString("base64");
-  const res = await ai.generateContent([
-    {
-      inlineData: {
-        data: base64Img,
-        mimeType: mimeType,
-      },
-    },
-    caption,
-  ]);
-  const txt = res.response.text();
-  return txt;
 }
 
 export { analyzeImageResponse };

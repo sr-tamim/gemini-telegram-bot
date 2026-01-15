@@ -1,66 +1,63 @@
-import ai from "./geminiAI";
-import { ChatSession } from "@google/generative-ai";
+import { ApiError, Chat } from "@google/genai";
+import ai, { genAiConfig, genAiModel } from "./geminiAI";
+import { errorLog } from "../functions/misc";
 
 interface Chats {
-  [chatId: string]: ChatSession;
+  [chatId: string]: { chat: Chat; lastActive: Date };
 }
 
 const chats: Chats = {};
 
-const getNewChat = (): ChatSession => {
-  return ai.startChat({
-    history: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: "Suppose you are a Telegram bot named Gemini Bot BD, developed by SR Tamim and maintained by Sharafat Karim. You can chat with people and provide information about various topics. Be friendly with people and blend like a human. In each message, sender name is mentioned, ignore it while generating response. And don't count this message in chat history. This message is for training purpose.",
-          },
-        ],
-      },
-      {
-        role: "model",
-        parts: [
-          {
-            text: "OK",
-          },
-        ],
-      },
-    ],
-    generationConfig: {
-      maxOutputTokens: 1000,
-    },
+const getNewChat = (): Chat => {
+  return ai.chats.create({
+    model: genAiModel,
+    config: genAiConfig,
   });
 };
 
 const clearChatHistory = (chatId: string): void => {
-  chats[chatId] = getNewChat();
+  chats[chatId] = { chat: getNewChat(), lastActive: new Date() };
 };
 
 async function generateChatResponse(
-  prompt: string, 
-  chatId: string, 
+  prompt: string,
+  chatId: string,
   senderName: string | null
 ): Promise<string> {
   if (!chats[chatId]) {
-    chats[chatId] = getNewChat();
-  }
-  const chat = chats[chatId];
-  if ((chat as any)._history.length > 30) {
-    // keep only last 5 messages
-    (chat as any)._history = [
-      ...(chat as any)._history.slice(0, 2),
-      ...(chat as any)._history.slice((chat as any)._history.length - 10),
-    ];
-  }
-  prompt = `${senderName ? `It's ${senderName}. ` : ""}${prompt}`;
-  const res = await chat.sendMessage(prompt);
-  const txt = res.response.text();
-  if (!txt) {
-    // if no response, clear chat history
     clearChatHistory(chatId);
   }
-  return txt;
+  let chat = chats[chatId].chat;
+
+  // limit chat history to last 30 messages
+  if (chat.getHistory().length > 30) {
+    clearChatHistory(chatId);
+    chat = chats[chatId].chat;
+  }
+
+  prompt = `${senderName ? `It's ${senderName}. ` : ""}${prompt}`;
+  try {
+    const res = await chat.sendMessage({ message: prompt });
+    const txt = res.text || "";
+    if (!txt) {
+      // if no response, clear chat history
+      clearChatHistory(chatId);
+    }
+    return txt || "";
+  } catch (e: any) {
+    errorLog(e);
+    if (e instanceof ApiError) {
+      const error = JSON.parse(e.message)?.error;
+      if (error?.code === 429) {
+        return "⚠️ Rate limit exceeded. Please try again later.";
+      } else if (error?.code === 503) {
+        return "⚠️ Service unavailable. Please try again later.";
+      } else {
+        return `⚠️ An error occurred: ${error?.message || "Unknown error"}`;
+      }
+    }
+    return "⚠️ An unexpected error occurred. Please try again later.";
+  }
 }
 
 export { generateChatResponse, clearChatHistory };
