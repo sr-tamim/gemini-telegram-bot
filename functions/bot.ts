@@ -1,30 +1,30 @@
-require("dotenv").config();
-const { Telegraf } = require("telegraf");
-const { message } = require("telegraf/filters");
-const { checkGroup, errorLog } = require("./misc");
-const { addMessageToQueue } = require("./messageQueue");
-const { getContentResponse } = require("../gemini/generateContent");
-const { clearChatHistory } = require("../gemini/generateChat");
+import "dotenv/config";
+import { Telegraf, Context } from "telegraf";
+import { message } from "telegraf/filters";
+import { checkGroup, errorLog } from "./misc";
+import { addMessageToQueue } from "./messageQueue";
+import { getContentResponse } from "../gemini/generateContent";
+import { clearChatHistory } from "../gemini/generateChat";
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf(process.env.BOT_TOKEN || "");
 
 /* ======= bot actions ======= */
-bot.start(async (ctx) => {
+bot.start(async (ctx: Context) => {
   console.log("Received /start command");
   try {
     if (!checkGroup(ctx)) return; // check if bot is allowed to reply in this group
 
     // clear chat history
-    clearChatHistory(ctx.message?.chat?.id.toString());
+    clearChatHistory(ctx.message?.chat?.id.toString() || "");
 
     return ctx.reply(
       "Hi, this is *Gemini Bot BD*, ready to chat with you. \nReply to my message to start chatting...",
       {
-        parse_mode: "Markdown",
+        parse_mode: "Markdown" as any,
         reply_to_message_id: ctx.message?.message_id,
         allow_sending_without_reply: true,
         // reply_markup: { force_reply: true, selective: true }
-      }
+      } as any
     );
   } catch (e) {
     errorLog(e);
@@ -33,15 +33,15 @@ bot.start(async (ctx) => {
   }
 });
 
-bot.command("about", async (ctx) => {
+bot.command("about", async (ctx: Context) => {
   console.log("Received /about command");
   try {
     return ctx.reply(
       "I am *Gemini Bot BD*\\. I am a Telegram bot developed by *SR Tamim* \\(@sr\\_tamim\\) and maintained by *Sharafat Karim* \\(@SharafatKarim\\)\\. I am here to chat with you\\.",
       {
-        parse_mode: "MarkdownV2",
+        parse_mode: "MarkdownV2" as any,
         allow_sending_without_reply: true,
-      }
+      } as any
     );
   } catch (e) {
     errorLog(e);
@@ -50,29 +50,29 @@ bot.command("about", async (ctx) => {
   }
 });
 
-bot.command("translate", async (ctx) => {
+bot.command("translate", async (ctx: Context) => {
   console.log("Received /translate command");
   try {
     if (!checkGroup(ctx)) return; // check if bot is allowed to reply in this group
 
     // translation input text from reply to message
-    let text = ctx.message?.reply_to_message?.text;
+    let text = (ctx.message as any)?.reply_to_message?.text;
     if (!text) {
       return ctx.reply("Reply to a message to translate it");
     }
     text = `translate to bn: "${text.trim()}"`;
 
-    ctx.telegram.sendChatAction(ctx.message.chat.id, "typing");
+    ctx.telegram.sendChatAction(ctx.message!.chat.id, "typing");
     const res = await getContentResponse(text);
     if (!res) {
       return ctx.reply("🤐");
     }
     return ctx.reply(res, {
-      parse_mode: "Markdown",
-      reply_to_message_id: ctx.message.message_id,
+      parse_mode: "Markdown" as any,
+      reply_to_message_id: ctx.message!.message_id,
       allow_sending_without_reply: true,
-    });
-  } catch (e) {
+    } as any);
+  } catch (e: any) {
     if (
       e?.response?.error_code === 400 &&
       e?.response?.description?.toLowerCase().includes("can't parse entities")
@@ -84,7 +84,7 @@ bot.command("translate", async (ctx) => {
           reply_to_message_id: ctx.message?.message_id,
           allow_sending_without_reply: true,
           // reply_markup: { force_reply: true, selective: true }
-        });
+        } as any);
       } catch (e) {
         errorLog(e);
         return ctx.reply("Error occured");
@@ -96,8 +96,8 @@ bot.command("translate", async (ctx) => {
   }
 });
 
-bot.on(message("reply_to_message"), async (ctx) => {
-  if (ctx.message.via_bot) {
+bot.on(message("reply_to_message"), async (ctx: Context) => {
+  if ((ctx.message as any).via_bot) {
     return ctx.reply("Sorry! I don't reply bots.");
   }
   try {
@@ -105,24 +105,24 @@ bot.on(message("reply_to_message"), async (ctx) => {
 
     // message must be a reply of this bot's message
     if (
-      ctx.message?.reply_to_message?.from?.id?.toString() !==
-      process.env.BOT_ID.toString()
+      (ctx.message as any)?.reply_to_message?.from?.id?.toString() !==
+      process.env.BOT_ID?.toString()
     )
       return;
 
-    ctx.telegram.sendChatAction(ctx.message.chat.id, "typing");
+    ctx.telegram.sendChatAction(ctx.message!.chat.id, "typing");
     addMessageToQueue(ctx);
   } catch (error) {
     console.log(error);
-    clearChatHistory(ctx.message?.chat?.id.toString());
+    clearChatHistory((ctx.message as any)?.chat?.id.toString() || "");
     errorLog(error);
     return ctx.reply("Error occured");
   }
 });
 
-bot.on(message("photo"), async (ctx) => {
+bot.on(message("photo"), async (ctx: Context) => {
   console.log("Received photo message");
-  if (ctx.message.via_bot) {
+  if ((ctx.message as any).via_bot) {
     return ctx.reply("Sorry! I don't reply bots.");
   }
   try {
@@ -130,12 +130,12 @@ bot.on(message("photo"), async (ctx) => {
 
     // message must be a reply of this bot's message
     if (
-      ctx.message?.reply_to_message?.from?.id?.toString() !==
-      process.env.BOT_ID.toString()
+      (ctx.message as any)?.reply_to_message?.from?.id?.toString() !==
+      process.env.BOT_ID?.toString()
     )
       return;
 
-    ctx.telegram.sendChatAction(ctx.message.chat.id, "typing");
+    ctx.telegram.sendChatAction(ctx.message!.chat.id, "typing");
     addMessageToQueue(ctx);
   } catch (error) {
     console.log(error);
@@ -144,6 +144,4 @@ bot.on(message("photo"), async (ctx) => {
   }
 });
 
-module.exports = {
-  bot,
-};
+export { bot };

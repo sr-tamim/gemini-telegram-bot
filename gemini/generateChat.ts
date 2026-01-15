@@ -1,7 +1,13 @@
-const ai = require("../gemini/geminiAI");
-const chats = {};
+import ai from "./geminiAI";
+import { ChatSession } from "@google/generative-ai";
 
-const getNewChat = () => {
+interface Chats {
+  [chatId: string]: ChatSession;
+}
+
+const chats: Chats = {};
+
+const getNewChat = (): ChatSession => {
   return ai.startChat({
     history: [
       {
@@ -27,20 +33,24 @@ const getNewChat = () => {
   });
 };
 
-const clearChatHistory = (chatId) => {
+const clearChatHistory = (chatId: string): void => {
   chats[chatId] = getNewChat();
 };
 
-async function generateChatResponse(prompt, chatId, senderName) {
+async function generateChatResponse(
+  prompt: string, 
+  chatId: string, 
+  senderName: string | null
+): Promise<string> {
   if (!chats[chatId]) {
     chats[chatId] = getNewChat();
   }
   const chat = chats[chatId];
-  if (chat._history.length > 30) {
+  if ((chat as any)._history.length > 30) {
     // keep only last 5 messages
-    chat._history = [
-      ...chat._history.slice(0, 2),
-      ...chat._history.slice(chat._history.length - 10),
+    (chat as any)._history = [
+      ...(chat as any)._history.slice(0, 2),
+      ...(chat as any)._history.slice((chat as any)._history.length - 10),
     ];
   }
   prompt = `${senderName ? `It's ${senderName}. ` : ""}${prompt}`;
@@ -53,4 +63,4 @@ async function generateChatResponse(prompt, chatId, senderName) {
   return txt;
 }
 
-module.exports = { generateChatResponse, clearChatHistory };
+export { generateChatResponse, clearChatHistory };

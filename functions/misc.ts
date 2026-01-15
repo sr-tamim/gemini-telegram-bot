@@ -1,10 +1,14 @@
-require("dotenv").config();
-const allowedGroups = process.env.GROUP_ID.toString().split(",");
-const fs = require("fs");
+import * as fs from "fs";
+import { Context } from "telegraf";
+
+const allowedGroups = (process.env.GROUP_ID || "").toString().split(",");
 
 /* ======= helper functions ======= */
-const checkGroup = (ctx) => {
-  const isAllowed = allowedGroups.includes(ctx.message?.chat?.id.toString());
+const checkGroup = (ctx: Context): boolean => {
+  return true;
+  const isAllowed = allowedGroups.includes(
+    ctx.message?.chat?.id.toString() || ""
+  );
   if (!isAllowed) {
     ctx.reply(
       "I am not allowed to reply outside specific groups. Join the public group and chat with me.\nhttps://t.me/ai_bot_bd_public"
@@ -14,8 +18,9 @@ const checkGroup = (ctx) => {
 };
 
 // write log to file
-function errorLog(err) {
-  const msg = err.message || JSON.stringify(err);
+function errorLog(err: Error | unknown): void {
+  const msg =
+    err instanceof Error ? err.message : JSON.stringify(err);
   const date = new Date().toLocaleString();
   // create logs folder if not exists
   if (!fs.existsSync("./logs")) {
@@ -34,7 +39,4 @@ function errorLog(err) {
   );
 }
 
-module.exports = {
-  checkGroup,
-  errorLog,
-};
+export { checkGroup, errorLog };

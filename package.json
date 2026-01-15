@@ -2,19 +2,27 @@
   "name": "gemini-telegram-bot",
   "version": "1.0.0",
   "description": "A Telegram bot uses Gemini api to response messages",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec ts-node index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "SR Tamim",
   "license": "MIT",
   "dependencies": {
+    "@google/genai": "^1.36.0",
     "@google/generative-ai": "^0.24.1",
     "dotenv": "^17.2.3",
-    "nodemon": "^3.1.11",
     "telegraf": "^4.16.3"
   },
-  "packageManager": "yarn@4.12.0"
+  "packageManager": "yarn@4.12.0",
+  "devDependencies": {
+    "@types/dotenv": "^8.2.3",
+    "@types/node": "^25.0.8",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
 }

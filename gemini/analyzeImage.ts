@@ -1,6 +1,6 @@
-const ai = require("../gemini/geminiAI");
+import ai from "./geminiAI";
 
-function getMimeType(url) {
+function getMimeType(url: string): string | null {
   const ext = url.split(".").pop();
   switch (ext) {
     case "jpg":
@@ -19,7 +19,10 @@ function getMimeType(url) {
   }
 }
 
-async function analyzeImageResponse(imgURL, caption) {
+async function analyzeImageResponse(
+  imgURL: URL, 
+  caption: string
+): Promise<string> {
   const mimeType = getMimeType(imgURL.href);
   if (!mimeType) {
     return "Unsupported image format";
@@ -39,4 +42,4 @@ async function analyzeImageResponse(imgURL, caption) {
   return txt;
 }
 
-module.exports = { analyzeImageResponse };
+export { analyzeImageResponse };
