@@ -11,6 +11,6 @@ RUN yarn build
 
 # Production stage
 FROM base AS production
-RUN yarn install --immutable --production
+RUN yarn workspaces focus --production
 COPY --from=builder /app/dist ./dist
 CMD ["yarn", "start"]
