@@ -5,7 +5,6 @@ const allowedGroups = (process.env.GROUP_ID || "").toString().split(",");
 
 /* ======= helper functions ======= */
 const checkGroup = (ctx: Context): boolean => {
-  return true;
   const isAllowed = allowedGroups.includes(
     ctx.message?.chat?.id.toString() || ""
   );
