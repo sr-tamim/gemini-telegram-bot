@@ -13,4 +13,6 @@ RUN yarn build
 FROM base AS production
 RUN yarn workspaces focus --production
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/.env ./.env
+
 CMD ["yarn", "start"]
