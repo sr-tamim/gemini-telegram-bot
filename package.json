@@ -13,7 +13,6 @@
   "license": "MIT",
   "dependencies": {
     "@google/genai": "^1.36.0",
-    "@google/generative-ai": "^0.24.1",
     "dotenv": "^17.2.3",
     "telegraf": "^4.16.3"
   },
